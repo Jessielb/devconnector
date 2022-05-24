@@ -5,7 +5,7 @@ const db = config.get('mongoURI'); // gets us the value we entered in default.js
 // using async await to connect to mongoDB
 const connectDB = async () => { // function to be called from server.js
     try { // sync-await wrapped inside of try-catch block to check for errors
-        await mongoose.connect(db, {useNewUrlParser: true}); // mongoose.connect returns a promise which we 'await' for
+        await mongoose.connect(db); // mongoose.connect returns a promise which we 'await' for
         console.log('MongoDB Connected...');
     } catch(err) {
         console.error(err.message);
