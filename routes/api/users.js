@@ -29,10 +29,10 @@ router.post('/', [ // using express validator
     try 
     {
 
-        // See if user exists
+        // See if user exists in database
         let user = await User.findOne({ email });
 
-        if(user) {
+        if(user) { // if it does exist, throw an err
             return res.status(400).json({ errors: [{ msg: 'User already exists' }]});
         }
 
@@ -82,7 +82,6 @@ router.post('/', [ // using express validator
         console.error(err.message);
         res.status(500).send('Server error'); // status gets outputted
     }
-
 });
 
 module.exports = router; // export the route
