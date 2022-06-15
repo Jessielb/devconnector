@@ -170,4 +170,98 @@ router.delete('/', auth, async (req, res) => {
     }
 });
 
+
+// @route   PUT api/profile/experience
+// @desc    Add profile experience
+// @access  Private
+router.put(
+    '/experience', 
+    [
+        auth, 
+        [
+            check('title', 'Title is required')
+                .not()
+                .isEmpty(),
+            check('company', 'Company is required')
+                .not()
+                .isEmpty(),
+            check('from', 'From date is required')
+                .not()
+                .isEmpty()
+        ]
+    ], 
+    async (req, res) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const {
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description
+        } = req.body;
+
+        const newExp = { // creates object with the data the user submits
+            title,
+            company,
+            location,
+            from,
+            to,
+            current,
+            description
+        }
+
+        // now we deal with mongodb
+        try {
+            // profile we wanna add the exp to. which we get from the user token
+            const profile = await Profile.findOne({ user: req.user.id });
+
+            // experience is an array, and unshift is to push to the beginning of it; so we add the new exp to it
+            profile.experience.unshift(newExp);
+
+            await profile.save();
+
+            res.json(profile);
+        } 
+        catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+
+    }
+);
+
+// @route   DELETE api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
+router.delete('/experience/:exp_id', auth, async (req, res) => {
+    try {
+        // current logged user's profile
+        const profile = await Profile.findOne({ user: req.user.id });
+
+        // Get the index for the experience we want to remove
+        const removeIndex = profile.experience.map(item => item.id).indexOf(req.params.exp_id);
+
+        // at positive removeIndex in experience array, remove 1 item (splice)
+        profile.experience.splice(removeIndex, 1);
+
+        // save the changes
+        await profile.save();
+
+        // response
+        res.json(profile);
+    }
+    catch (err) {
+        console.error(err.message);
+            res.status(500).send('Server Error');
+    }
+});
+
+
+
 module.exports = router; // export the route
